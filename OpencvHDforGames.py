@@ -43,7 +43,10 @@ with mp_hand.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as
                     fingers.append(0)
         
         total = fingers.count(1)
-        print(total)
+        if total == 0:
+            print("Brake")
+        else:
+            print("Accelerate")
 
         cv2.imshow("Frame", image)
         k = cv2.waitKey(1)
