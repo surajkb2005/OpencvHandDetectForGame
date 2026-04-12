@@ -27,18 +27,21 @@ with mp_hand.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as
                     cx, cy = int(lm.x * w), int(lm.y * h)
                     lmlist.append([id, cx, cy])
                 mp_draw.draw_landmarks(image, hand_landmark, mp_hand.HAND_CONNECTIONS)
+
+        fingers = []
         if len(lmlist) != 0:
             if lmlist[tipIds[0]][1] > lmlist[tipIds[0] - 1][1]:
-                print("Thumb is Open")
+                fingers.append(1)
             else:
-                print("Thumb is Closed")
+                fingers.append(0)
             # because i need tip id from 1 to 4 so thumb is not included in this loop
             for id in range(1, 5):
                 # In lmlist, 1 is x axis and 2 is y axis
                 if lmlist[tipIds[id]][2] < lmlist[tipIds[id] - 2][2]:
-                    print(id, "Finger is Up")
+                    fingers.append(1)
                 else:
-                    print(id, "Finger is Down")
+                    fingers.append(0)
+        print(fingers)
         cv2.imshow("Frame", image)
         k = cv2.waitKey(1)
         if k == ord("q"):
