@@ -6,6 +6,7 @@ mp_hand = mp.solutions.hands
 
 video = cv2.VideoCapture(0)
 
+tipIds = [4, 8, 12, 16, 20]
 with mp_hand.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
     while True:
         ret, image = video.read()
@@ -27,10 +28,17 @@ with mp_hand.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as
                     lmlist.append([id, cx, cy])
                 mp_draw.draw_landmarks(image, hand_landmark, mp_hand.HAND_CONNECTIONS)
         if len(lmlist) != 0:
-            if lmlist[8][2] < lmlist[6][2]:
-                print("Index Finger is Up")
+            if lmlist[tipIds[0]][1] > lmlist[tipIds[0] - 1][1]:
+                print("Thumb is Open")
             else:
-                print("Index Finger is Down")
+                print("Thumb is Closed")
+            # because i need tip id from 1 to 4 so thumb is not included in this loop
+            for id in range(1, 5):
+                # In lmlist, 1 is x axis and 2 is y axis
+                if lmlist[tipIds[id]][2] < lmlist[tipIds[id] - 2][2]:
+                    print(id, "Finger is Up")
+                else:
+                    print(id, "Finger is Down")
         cv2.imshow("Frame", image)
         k = cv2.waitKey(1)
         if k == ord("q"):
