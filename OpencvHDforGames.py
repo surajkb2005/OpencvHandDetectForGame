@@ -41,7 +41,10 @@ with mp_hand.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as
                     fingers.append(1)
                 else:
                     fingers.append(0)
-        print(fingers)
+        
+        total = fingers.count(1)
+        print(total)
+
         cv2.imshow("Frame", image)
         k = cv2.waitKey(1)
         if k == ord("q"):
