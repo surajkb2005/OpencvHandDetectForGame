@@ -16,15 +16,21 @@ with mp_hand.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as
             True  # Re-enables write access so we can draw on the image again.
         )
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        lmlist = []
         if results.multi_hand_landmarks:
             for hand_landmark in results.multi_hand_landmarks:
                 myHands = results.multi_hand_landmarks[0]
                 for id, lm in enumerate(hand_landmark.landmark):
                     h, w, c = image.shape
                     cx, cy = int(lm.x * w), int(lm.y * h)
-                    print(id, cx, cy)
+                    lmlist.append([id, cx, cy])
                 mp_draw.draw_landmarks(image, hand_landmark, mp_hand.HAND_CONNECTIONS)
-
+        if len(lmlist) != 0:
+            if lmlist[8][2] < lmlist[6][2]:
+                print("Index Finger is Up")
+            else:
+                print("Index Finger is Down")
         cv2.imshow("Frame", image)
         k = cv2.waitKey(1)
         if k == ord("q"):
