@@ -8,6 +8,10 @@ right_pressed = 0x4D
 
 left_pressed = 0x4B
 
+up_pressed = 0x11
+
+down_pressed = 0x1F
+
 # C struct redefinitions
 PUL = ctypes.POINTER(ctypes.c_ulong)
 

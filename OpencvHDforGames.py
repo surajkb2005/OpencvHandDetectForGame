@@ -3,11 +3,13 @@ import mediapipe as mp
 
 # for controlling the keyboard
 import time
-from directkeys import right_pressed, left_pressed
+from directkeys import right_pressed, left_pressed, up_pressed, down_pressed
 from directkeys import PressKey, ReleaseKey
 
-break_key_pressed = left_pressed
-accelerato_key_pressed = right_pressed
+left_key_pressed = left_pressed
+right_key_pressed = right_pressed
+up_key_pressed = up_pressed
+down_key_pressed = down_pressed
 
 time.sleep(2.0)
 current_key_pressed = set()
@@ -23,8 +25,8 @@ try:
     ) as hands:
         while True:
             keyPressed = False
-            break_pressed = False
-            accelerator_pressed = False
+            left_active = False
+            right_active = False
             key_count = 0
             key_pressed = 0
 
@@ -63,62 +65,60 @@ try:
                     else:
                         fingers.append(0)
 
-                total = fingers.count(1)
+                total = fingers.count(
+                    1
+                )  # counts the number of fingers that are up (ie. 1)
                 if total == 0:
                     cv2.rectangle(image, (20, 300), (270, 425), (0, 255, 0), cv2.FILLED)
                     cv2.putText(
                         image,
-                        "BRAKE",
+                        "Left",
                         (45, 375),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         2,
                         (255, 0, 0),
                         5,
                     )
-                    if break_key_pressed not in current_key_pressed:
-                        PressKey(break_key_pressed)
-                    break_pressed = True
-                    current_key_pressed.add(break_key_pressed)
-                    key_pressed = break_key_pressed
+                    if left_key_pressed not in current_key_pressed:
+                        PressKey(left_key_pressed)
+                    left_active = True
+                    current_key_pressed.add(left_key_pressed)
+                    key_pressed = left_key_pressed
                     keyPressed = True
                     key_count = key_count + 1
                 elif total == 5:
                     cv2.rectangle(image, (20, 300), (270, 425), (0, 255, 0), cv2.FILLED)
                     cv2.putText(
                         image,
-                        "GAS",
+                        "Right",
                         (45, 375),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         2,
                         (255, 0, 0),
                         5,
                     )
-                    if accelerato_key_pressed not in current_key_pressed:
-                        PressKey(accelerato_key_pressed)
-                    key_pressed = accelerato_key_pressed
-                    accelerator_pressed = True
+                    if right_key_pressed not in current_key_pressed:
+                        PressKey(right_key_pressed)
+                    key_pressed = right_key_pressed
+                    right_active = True
                     keyPressed = True
-                    current_key_pressed.add(accelerato_key_pressed)
+                    current_key_pressed.add(right_key_pressed)
                     key_count = key_count + 1
 
-            if not keyPressed and len(current_key_pressed) != 0:
+            if not keyPressed:
                 for key in current_key_pressed:
                     ReleaseKey(key)
                 current_key_pressed = set()
 
-            elif key_count == 1 and len(current_key_pressed) == 2:
-                for key in current_key_pressed:
-                    if key_pressed != key:
+            else:
+                for key in list(current_key_pressed):
+                    if key != key_pressed:
                         ReleaseKey(key)
-                current_key_pressed = set()
-
-                for key in current_key_pressed:
-                    ReleaseKey(key)
-                current_key_pressed = set()
+                        current_key_pressed.remove(key)
 
             cv2.imshow("Frame", image)
             k = cv2.waitKey(1)
-            if k == ord("q"):
+            if k & 0xFF == ord("q"):
                 break
 
 except KeyboardInterrupt:
