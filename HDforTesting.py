@@ -28,8 +28,15 @@ try:
             image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 
             if not result.multi_hand_landmarks:
-                print("No hands detected")
-                cv.putText(image,"No hands detected",(10,30),cv.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
+                cv.putText(
+                    image,
+                    "No hands detected",
+                    (10, 30),
+                    cv.FONT_HERSHEY_SIMPLEX,
+                    1,
+                    (0, 0, 255),
+                    2,
+                )
                 cv.imshow("Hand Detection", image)
 
                 if cv.waitKey(1) & 0xFF == 27:
@@ -37,19 +44,25 @@ try:
                 continue
 
             if result.multi_hand_landmarks:
+                lmlist = []
+
                 for handlm, handness in zip(
                     result.multi_hand_landmarks, result.multi_handedness
                 ):
+                    hand_label = handness.classification[0].label
                     h, w, c = image.shape
 
-                    lmlist = []
+                    if hand_label == "Left":
+                        lhand = -10
+                    else:
+                        lhand = 10
 
                     for id, lm in enumerate(handlm.landmark):
                         cx, cy = int(lm.x * w), int(lm.y * h)
-                        lmlist.append([id, cx, cy])
+                        lmlist.append([lhand, id, cx, cy])
                         cv.circle(image, (cx, cy), 5, (255, 0, 0), cv.FILLED)
 
-                    hand_label = handness.classification[0].label
+                    print(lmlist, "\n")
 
             cv.imshow("Hand Detection", image)
 
