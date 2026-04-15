@@ -81,7 +81,11 @@ try:
             if not results.multi_hand_landmarks:
                 update_keys([])
                 cv2.imshow("Hand Control", image)
-                if cv2.waitKey(1) & 0xFF == ord("q"):
+
+                k = cv2.waitKey(1)
+                if k & 0xFF == 27:
+                    break
+                if k & 0xFF == ord("q"):
                     break
                 continue
             if results.multi_hand_landmarks and results.multi_handedness:
@@ -161,6 +165,8 @@ try:
 
             cv2.imshow("Hand Control", image)
             k = cv2.waitKey(1)
+            if k & 0xFF == 27:
+                break
             if k & 0xFF == ord("q"):
                 break
 

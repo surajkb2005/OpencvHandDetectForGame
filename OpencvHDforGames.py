@@ -3,13 +3,12 @@ import mediapipe as mp
 
 # for controlling the keyboard
 import time
-from directkeys import right_pressed, left_pressed, up_pressed, down_pressed
+from directkeys import left_arrow, right_arrow
 from directkeys import PressKey, ReleaseKey
 
-left_key_pressed = left_pressed
-right_key_pressed = right_pressed
-up_key_pressed = up_pressed
-down_key_pressed = down_pressed
+left_key_pressed = left_arrow
+right_key_pressed = right_arrow
+
 
 time.sleep(2.0)
 current_key_pressed = set()
@@ -37,9 +36,7 @@ try:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False  # Makes the image read-only to improve performance while MediaPipe processes it (no need to modify pixels).
             results = hands.process(image)
-            image.flags.writeable = (
-                True  # Re-enables write access so we can draw on the image again.
-            )
+            image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
             lmlist = []
@@ -118,6 +115,8 @@ try:
 
             cv2.imshow("Frame", image)
             k = cv2.waitKey(1)
+            if k & 0xFF == 27:
+                break
             if k & 0xFF == ord("q"):
                 break
 
