@@ -2,12 +2,63 @@ import cv2 as cv
 import mediapipe as mp
 import time
 
+# importing arduino code to controll led's
+from Arduino import controllers as cnt
+
 mp_draw = mp.solutions.drawing_utils
 mp_hand = mp.solutions.hands
 
 video = cv.VideoCapture(0)
 
 time.sleep(2.0)
+
+tipids = [4, 8, 12, 16, 20]
+
+
+def getfingers(lmlist_l, lmlist_r):
+    fingers = []
+
+    # if len(lmlist_l) != 0:
+    #     for id in range(1, 5):
+    #         if lmlist_l[tipids[id]][2] < lmlist_l[tipids[id] - 2][2]:
+    #             fingers.append(1)
+    #         else:
+    #             fingers.append(0)
+    #     if lmlist_l[tipids[0]][1] > lmlist_l[tipids[0] - 1][1]:
+    #         fingers.append(1)
+    #     else:
+    #         fingers.append(0)
+    # else:
+    #     for id in range(0, 5):
+    #         fingers.append(0)
+
+    if len(lmlist_r) != 0:
+        if lmlist_r[tipids[0]][1] < lmlist_r[tipids[0] - 1][1]:
+            fingers.append(1)
+        else:
+            fingers.append(0)
+
+        for id in range(1, 5):
+            if lmlist_r[tipids[id]][2] < lmlist_r[tipids[id] - 2][2]:
+                fingers.append(1)
+            else:
+                fingers.append(0)
+    else:
+        for id in range(0, 5):
+            fingers.append(0)
+
+    return fingers
+
+
+def getlmlist(handlm, image):
+    lmlist = []
+    h, w, shape = image.shape
+    for id, lm in enumerate(handlm.landmark):
+        cx, cy = int(lm.x * w), int(lm.y * h)
+        lmlist.append([id, cx, cy])
+        image = cv.circle(image, (cx, cy), 5, (255, 0, 255), cv.FILLED)
+    return lmlist
+
 
 try:
     with mp_hand.Hands(
@@ -44,7 +95,8 @@ try:
                 continue
 
             if result.multi_hand_landmarks:
-                lmlist = []
+                lmlist_l = []
+                lmlist_r = []
 
                 for handlm, handness in zip(
                     result.multi_hand_landmarks, result.multi_handedness
@@ -53,16 +105,17 @@ try:
                     h, w, c = image.shape
 
                     if hand_label == "Left":
-                        lhand = -10
+                        lmlist_l = getlmlist(handlm, image)
                     else:
-                        lhand = 10
+                        lmlist_r = getlmlist(handlm, image)
 
-                    for id, lm in enumerate(handlm.landmark):
-                        cx, cy = int(lm.x * w), int(lm.y * h)
-                        lmlist.append([lhand, id, cx, cy])
-                        cv.circle(image, (cx, cy), 5, (255, 0, 0), cv.FILLED)
+                    fingers = getfingers(lmlist_l, lmlist_r)
 
-                    print(lmlist, "\n")
+                    print(fingers)
+
+                    # send data to arduino
+                    cnt.led(fingers)
+                    time.sleep(0.1)
 
             cv.imshow("Hand Detection", image)
 
